@@ -1,0 +1,44 @@
+﻿@page "/imageloader"
+
+@using ImageLoader.Data
+@inject FileSystemService fileSystemService
+
+<h3>Image loader</h3>
+
+<button @onclick=LoadNames name="click" >Load names</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Load</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var name in names)
+        {
+            <tr>
+                <td>@name</td>
+                <td><button @onclick="() => Download(name)">Load</button></td>
+            </tr>   
+        }
+    </tbody>
+</table>
+
+
+<img src="@path" />
+
+@code {
+    string? path;
+    List<string> names = new List<string>();
+
+    private void LoadNames()
+    {
+        names = fileSystemService.GetNamesOfImages();
+    }
+
+    private void Download(string name)
+    {
+        path = fileSystemService.DownloadToLocal(name);
+    }  
+}
