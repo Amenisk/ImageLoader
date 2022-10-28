@@ -5,7 +5,7 @@
 
 <h3>Image loader</h3>
 
-<button @onclick=LoadNames name="click" >Load names</button>
+<button @onclick=UploadImages name="click">Load in BD</button>
 
 <table class="table">
     <thead>
@@ -25,12 +25,16 @@
     </tbody>
 </table>
 
-
-<img src="@path" />
+<img src="@path" width="1000"/>
 
 @code {
     string? path;
     List<string> names = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        LoadNames();
+    }
 
     private void LoadNames()
     {
@@ -40,5 +44,10 @@
     private void Download(string name)
     {
         path = fileSystemService.DownloadToLocal(name);
-    }  
+    } 
+
+    private void UploadImages()
+    {
+        fileSystemService.UploadImageToDb("C:/Users/LENOVO/Pictures/Images");
+    }
 }
