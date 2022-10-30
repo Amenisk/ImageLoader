@@ -5,7 +5,8 @@
 
 <h3>Image loader</h3>
 
-<button @onclick=UploadImages name="click">Load in BD</button>
+
+<InputFile OnChange="@LoadFiles" multiple />
 
 <table class="table">
     <thead>
@@ -25,11 +26,14 @@
     </tbody>
 </table>
 
+<p>@fileName</p>
 <img src="@path" width="1000"/>
 
 @code {
     string? path;
+    string? fileName;
     List<string> names = new List<string>();
+    List<IBrowserFile> _loadedFiles = new();
 
     protected override void OnInitialized()
     {
@@ -46,8 +50,16 @@
         path = fileSystemService.DownloadToLocal(name);
     } 
 
-    private void UploadImages()
+    private async Task LoadFiles(InputFileChangeEventArgs e)
     {
-        fileSystemService.UploadImageToDb("C:/Users/LENOVO/Pictures/Images");
-    }
+        _loadedFiles.Clear();
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            _loadedFiles.Add(file);
+            Stream stream = file.OpenReadStream();
+            await fileSystemService.UploadImageToDbAsync(stream, file.Name);
+            stream.Dispose();
+        }
+        LoadNames();
+    }  
 }

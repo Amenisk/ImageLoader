@@ -2,25 +2,19 @@
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using static System.Net.Mime.MediaTypeNames;
+using System.Runtime;
 
 namespace ImageLoader.Data
 {
     public class FileSystemService
     {
-        public void UploadImageToDb(string path)
+        public async Task UploadImageToDbAsync(Stream fs, string name)
         {
             var client = new MongoClient("mongodb://localhost");
             var database = client.GetDatabase("Images");
             var gridFS = new GridFSBucket(database);
-            string[] paths = Directory.GetFiles(path);
 
-            foreach (var p in paths)
-            {
-                using (FileStream fs = new FileStream(p, FileMode.Open))
-                {
-                    gridFS.UploadFromStream(GetNameFile(p), fs);
-                }
-            }
+            await gridFS.UploadFromStreamAsync(name, fs);
         }
 
         public string DownloadToLocal(string name)
@@ -30,7 +24,7 @@ namespace ImageLoader.Data
             var gridFS = new GridFSBucket(database);
             using (FileStream fs = new FileStream($"{Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/wwwroot/Images/")}{name}", FileMode.OpenOrCreate))
             {
-                gridFS.DownloadToStreamByName($"{name}", fs);
+                gridFS.DownloadToStreamByName(name, fs);
             }
 
             return $"Images/{name}";
@@ -50,13 +44,6 @@ namespace ImageLoader.Data
             }
 
             return names;
-        }
-
-        private string GetNameFile(string path)
-        {
-            string[] partPath = path.Split('\\');
-
-            return partPath[partPath.Length - 1];
         }
     }
 }
